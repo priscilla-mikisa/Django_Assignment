@@ -9,6 +9,7 @@ from .views import ClassDetailView
 from .views import ClassroomPeriodDetailView
 from .views import CoursesDetailView
 from .views import TeacherDetailView
+from .views import WeeklyTimetable
 
 
 
@@ -42,6 +43,9 @@ urlpatterns = [
     ), 
      path(
         "teachers/<int:id>/", TeacherDetailView.as_view(), name="teachers_detail_view"
-    )
+    ),
+     
+    path('weekly_timetable/', WeeklyTimetable.as_view(), name='weekly_timetable'),
+     
 ]
 

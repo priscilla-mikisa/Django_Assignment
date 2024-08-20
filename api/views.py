@@ -4,6 +4,7 @@ from django.shortcuts import render
 
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework import serializers
 from student.models import Student
 from .serializers import StudentSerializer
 from classes.models import Class
@@ -15,29 +16,31 @@ from .serializers import CoursesSerializer
 from teacher.models import Teacher
 from .serializers import TeacherSerializer
 from rest_framework import status
+from api.serializers import ClassesSerializer, CoursesSerializer, StudentSerializer, TeacherSerializer, ClassroomPeriodSerializer, MinimalClassPeriodSerializer, MinimalClassSerializer, MinimalCourseSerializer, MinimalStudentSerializer, MinimalTeacherSerializer
     
-
 class StudentListView(APIView):
-    def get(self,request):
-        Students = Student.objects.all()
+    def get(self, request):
+        students = Student.objects.all()
+        
         first_name = request.query_params.get("first_name")
         if first_name:
-            Students= Students.filter(first_name=first_name)
+            students = students.filter(first_name=first_name)
+        
         country = request.query_params.get("country")
         if country:
-           country= Students.filter(country=country)
-        serializer = StudentSerializer(country,many=True)
+            students = students.filter(country=country)  
+        serializer = MinimalStudentSerializer(students, many=True) 
         return Response(serializer.data)
-    
+
     def post(self, request):
         serializer = StudentSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data, status= status.HTTP_201_CREATED)
-        
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
         else:
-            return Response(serializer.errors, status= status.HTTP_400_BAD_REQUEST)
-
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+     
+  
 class ClassListView(APIView):
     def get(self,request):
         Classes = Class.objects.all()
@@ -58,6 +61,7 @@ class ClassroomPeriodListView(APIView):
     def get(self,request):
         Periods = ClassroomPeriod.objects.all()
         serializer = ClassroomPeriodSerializer(Periods,many=True)
+        serializer = MinimalClassPeriodSerializer(Periods, many=True)
         return Response(serializer.data)
     
     def post(self, request):
@@ -84,6 +88,8 @@ class CoursesListView(APIView):
         
         else:
             return Response(serializer.errors, status= status.HTTP_400_BAD_REQUEST)
+        
+    
 
     
 class TeacherListView(APIView):
@@ -127,16 +133,33 @@ class StudentDetailView(APIView):
         course = Courses.objects.get(id = course_id)
         student.courses.add(course)
         
-    
+    def unenroll(self, student, class_id):
+        classes = Class.objects.get(id=class_id)
+        classes.students.add(student)
+        
+    def add_to_class(self, student, class_id):
+        classes = Class.objects.get(id=class_id)
+        classes.students.add(student)
         
     def post(self, request,id):
-        student = Student.obj<ects.get(id=id)
+        student = Student.objects.get(id=id)
         action = request.data.get("action")
         if action=="email":
             course_id = request.data.get("course_id")
             self.enroll(student, course_id)
-         
-        return Response(status=status.HTTP_201_CREATED)
+            return Response(status=status.HTTP_201_CREATED)
+        
+        elif  action == "unenroll":
+            course_id = request.data.get("course_id")
+            self.unenroll(student, course_id)
+            return Response(status=status.HTTP_200_OK)
+        elif action == "add_to_class":
+            class_id = request.data.get("class_id")
+            self.add_to_class(student, class_id)
+            return Response(status=status.HTTP_201_CREATED)
+        else:
+            return Response(status=status.HTTP_400_BAD_REQUEST)     
+    
   
 class ClassDetailView(APIView):
     def get(self,request,id):
@@ -261,5 +284,12 @@ class TeacherDetailView(APIView):
             return Response(status=status.HTTP_201_CREATED)
         else:
             return Response(status=status.HTTP_400_BAD_REQUEST)
+        
+
+class WeeklyTimetable(APIView):
+    def get(self, request):
+        class_periods = ClassroomPeriod.objects.all()
+        serializer = ClassroomPeriodSerializer(class_periods, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
         
  
