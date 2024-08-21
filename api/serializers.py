@@ -30,7 +30,7 @@ class CoursesSerializer(serializers.ModelSerializer):
         
 class StudentSerializer(serializers.ModelSerializer):
   courses = CoursesSerializer(many=True)
-class Meta:
+  class Meta:
         model = Student
         fields = "__all__"
     
@@ -59,7 +59,7 @@ class MinimalCourseSerializer(serializers.ModelSerializer):
 class MinimalClassSerializer(serializers.ModelSerializer):
   class Meta:
     model = Class
-    field = ['class_id', 'class_name', 'class_capacity']
+    field = ['class_id', 'class_name', 'names_of_teachers']
     
 class MinimalStudentSerializer(serializers.ModelSerializer):
    full_name = serializers.SerializerMethodField()

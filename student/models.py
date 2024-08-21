@@ -1,4 +1,5 @@
 from django.db import models
+from courses.models import Courses
 
 # Create your models here.
 class Student(models.Model):
@@ -6,7 +7,7 @@ class Student(models.Model):
     last_name = models.CharField(max_length = 20)
     email = models.EmailField()
     date_of_birth = models.DateField()
-    courses = models.TextField()
+    courses = models.ManyToManyField(Courses) 
     student_code = models.PositiveSmallIntegerField()
     country = models.CharField(max_length = 28)
     gender = models.CharField(max_length = 20)

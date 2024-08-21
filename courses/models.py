@@ -1,7 +1,9 @@
 from django.db import models
+from teacher.models import Teacher
 
 # Create your models here.
 class Courses(models.Model):
+    teacher = models.ForeignKey(Teacher, on_delete=models.CASCADE)
     course_name = models.CharField(max_length = 20).primary_key
     course_id = models.SmallIntegerField()
     department = models.CharField(max_length = 20)
@@ -16,4 +18,6 @@ class Courses(models.Model):
     
     def __str__(self):
         return f"{self.course_name} {self.course_trainer_name}"
+    
+
     
